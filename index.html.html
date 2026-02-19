@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <title>PROJECT: ETERNAL LOVE // ULTRA MAX</title>
+    <style>
+        :root {
+            --neon-core: #fff;    /* Núcleo blanco caliente */
+            --neon-red: #ff003c;  /* Rojo neón intenso */
+            --neon-pink: #ff69b4; /* Rosa secundario */
+            --bg-dark: #020005;   /* Fondo casi negro */
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+        body {
+            background-color: var(--bg-dark);
+            /* Fondo complejo multicapa en movimiento constante */
+            background: 
+                radial-gradient(circle at 50% 50%, rgba(0,0,0,0) 20%, rgba(0,0,0,1) 100%), /* Viñeta oscura */
+                repeating-linear-gradient(0deg, transparent 0px, rgba(255, 0, 60, 0.1) 1px, transparent 2px), /* Rejilla H */
+                linear-gradient(45deg, #2b050c, #1a0514, #050a1a, #1a0509); /* Plasma de fondo */
+            background-size: 100% 100%, 20px 20px, 400% 400%;
+            animation: bg-shift 15s ease infinite;
+            
+            display: flex; justify-content: center; align-items: center;
+            min-height: 100vh; height: 100vh; /* Forzar altura completa en iOS */
+            font-family: 'Courier New', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+            overflow: hidden;
+            perspective: 1000px;
+        }
+
+        /* --- PANTALLA DE INICIO (OVERLAY) --- */
+        #overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(5,0,5,0.95); z-index: 2000;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            transition: all 0.8s ease-out;
+            backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+        }
+
+        #start-btn {
+            padding: 25px 50px; font-size: 1.5rem; color: var(--neon-core);
+            background: rgba(255,0,60,0.1); border: 3px solid var(--neon-red);
+            border-radius: 50px; cursor: pointer;
+            box-shadow: 0 0 30px var(--neon-red), inset 0 0 20px var(--neon-red);
+            text-transform: uppercase; letter-spacing: 5px; font-weight: bold;
+            animation: pulse-btn 1s infinite alternate;
+            text-shadow: 0 0 10px var(--neon-red);
+        }
+
+        /* --- CONTENEDOR PRINCIPAL --- */
+        .container {
+            position: relative; z-index: 10; text-align: center;
+            width: 95%; max-width: 450px;
+            opacity: 0; transform: scale(0.9) translateY(20px);
+            transition: all 1s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .container.active { opacity: 1; transform: scale(1) translateY(0); }
+
+        /* Título con efecto de fallo de energía (Glitch) */
+        .titulo-glitch {
+            font-size: 2.5rem; font-weight: 900; letter-spacing: 6px;
+            color: var(--neon-core); margin-bottom: 20px; position: relative;
+            text-shadow: 0 0 10px var(--neon-core), 0 0 30px var(--neon-red), 0 0 60px var(--neon-red);
+            animation: text-flicker 4s infinite;
+        }
+
+        /* Área de mensajes */
+        .mensaje-box {
+            height: 50px; margin-bottom: 25px;
+            display: flex; justify-content: center; align-items: center;
+        }
+        #text-display {
+            color: var(--neon-pink); font-size: 1.3rem; font-weight: bold;
+            text-transform: uppercase; letter-spacing: 2px; opacity: 0;
+            text-shadow: 0 0 10px var(--neon-pink), 0 0 20px var(--neon-red);
+        }
+        /* Animación de entrada de texto digital */
+        #text-display.digital-in {
+            animation: digital-entry 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        }
+
+        /* --- MONITOR ULTRA NEON --- */
+        .monitor-wrapper {
+            position: relative;
+            border: 4px solid var(--neon-red);
+            box-shadow: 0 0 20px var(--neon-red), inset 0 0 40px var(--neon-red), 0 0 80px rgba(255,0,60,0.5);
+            border-radius: 15px; padding: 20px 5px;
+            background: rgba(20, 0, 10, 0.9); overflow: hidden;
+            transform: perspective(500px) rotateX(2deg); /* Ligera inclinación 3D */
+        }
+
+        /* Capa de RUIDO DIGITAL animado sobre la pantalla */
+        .monitor-wrapper::before {
+            content: ""; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+            background: url('data:image/svg+xml,%3Csvg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"%3E%3Cfilter id="n"%3E%3CfeTurbulence type="fractalNoise" baseFrequency="0.7" numOctaves="3" stitchTiles="stitch"/%3E%3C/filter%3E%3Crect width="100%" height="100%" filter="url(%23n)" opacity="0.15"/%3E%3C/svg%3E');
+            animation: noise-move 0.4s steps(4) infinite; opacity: 0.2; mix-blend-mode: overlay; z-index: 2; pointer-events: none;
+        }
+
+        /* Barra de escaneo de luz que recorre la pantalla */
+        .scan-bar {
+            position: absolute; top: 0; left: -100%; width: 50%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent);
+            filter: blur(15px); mix-blend-mode: screen; z-index: 3;
+            animation: scan-screen 4s infinite linear;
+        }
+
+        .monitor-svg {
+            width: 100%; height: auto; position: relative; z-index: 1;
+            /* Filtro doble para un brillo extremo */
+            filter: drop-shadow(0 0 8px var(--neon-red)) drop-shadow(0 0 25px var(--neon-red));
+        }
+
+        /* Línea estática de fondo */
+        .pulso-fantasma {
+            fill: none; stroke: rgba(255, 0, 60, 0.3); stroke-width: 1.5;
+            stroke-dasharray: 4 6; /* Línea punteada */
+        }
+
+        /* Línea de energía principal */
+        .pulso-energia {
+            fill: none; stroke: var(--neon-core); stroke-width: 4;
+            stroke-linecap: round; stroke-linejoin: round;
+            stroke-dasharray: 1500; stroke-dashoffset: 1500; opacity: 0;
+        }
+        .pulso-energia.active-pulse {
+            animation: draw-energy-extreme 3s cubic-bezier(0.5, 0, 0.1, 1) infinite;
+        }
+
+        /* Botón de música */
+        #music-toggle {
+            position: fixed; top: 30px; right: 20px; z-index: 100;
+            background: rgba(0,0,0,0.5); border: 2px solid var(--neon-red);
+            color: white; border-radius: 50%; width: 50px; height: 50px; font-size: 24px;
+            display: none; backdrop-filter: blur(5px); box-shadow: 0 0 20px var(--neon-red);
+        }
+
+        /* --- ANIMACIONES EXTREMAS --- */
+        @keyframes bg-shift {
+            0%, 100% { background-position: 0% 50%, 0 0, 0% 50%; }
+            50% { background-position: 100% 50%, 20px 20px, 100% 50%; }
+        }
+
+        /* Dibujo del pulso con destello violento en el pico */
+        @keyframes draw-energy-extreme {
+            0% { stroke-dashoffset: 1500; opacity: 0; }
+            10% { opacity: 1; }
+            45% { filter: brightness(1); stroke-width: 4; }
+            50% { stroke-dashoffset: 700; filter: brightness(4) drop-shadow(0 0 30px #fff); stroke-width: 6; } /* El destello */
+            55% { filter: brightness(1); stroke-width: 4; }
+            90%, 100% { stroke-dashoffset: 0; opacity: 0; }
+        }
+
+        /* Temblor de pantalla completo al impacto */
+        body.beat-impact { animation: screen-shock 0.3s cubic-bezier(.36,.07,.19,.97) both; }
+        @keyframes screen-shock {
+            0% { transform: scale(1); filter: brightness(1); }
+            20% { transform: scale(1.02) rotate(-1deg); filter: brightness(1.4) contrast(1.2); }
+            40% { transform: scale(1.02) rotate(1deg); }
+            60% { transform: scale(1.01); }
+            100% { transform: scale(1); filter: brightness(1); }
+        }
+
+        @keyframes text-flicker {
+            0%, 19%, 21%, 23%, 55%, 57%, 100% { opacity: 1; text-shadow: 0 0 10px var(--neon-core), 0 0 30px var(--neon-red), 0 0 60px var(--neon-red); }
+            20%, 22%, 56% { opacity: 0.6; text-shadow: none; }
+        }
+
+        @keyframes noise-move { 0% { transform: translate(0,0) } 100% { transform: translate(10%,10%) } }
+        @keyframes scan-screen { 0% { left: -100%; } 100% { left: 200%; } }
+
+        @keyframes digital-entry {
+            0% { opacity: 0; transform: scaleY(0.1) skewX(-30deg); filter: blur(10px); }
+            70% { opacity: 1; transform: scaleY(1.1) skewX(5deg); filter: blur(0px); color: var(--neon-core); }
+            100% { opacity: 1; transform: scaleY(1) skewX(0deg); color: var(--neon-pink); }
+        }
+
+        .super-particle {
+            position: absolute; pointer-events: none;
+            filter: blur(0.5px) drop-shadow(0 0 5px var(--neon-red));
+            will-change: transform, opacity; mix-blend-mode: screen;
+            animation: explode-up 2.5s cubic-bezier(0, 0.9, 0.57, 1) forwards;
+        }
+        @keyframes explode-up {
+            0% { transform: translateY(105vh) scale(0) rotate(0deg); opacity: 0; }
+            20% { opacity: 1; }
+            100% { transform: translateY(-110vh) scale(2) rotate(360deg); opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+    <audio id="cancion" src="cancion.mp3" loop preload="auto"></audio>
+
+    <div id="overlay">
+        <button id="start-btn">▶ INICIAR SISTEMA</button>
+        <p style="color: var(--neon-pink); margin-top: 25px; font-size: 0.9rem; letter-spacing: 2px; text-transform: uppercase;">Conecta tus auriculares 🎧</p>
+    </div>
+
+    <button id="music-toggle">🔊</button>
+
+    <div class="container" id="main-content">
+        <h1 class="titulo-glitch">SOLO POR TI</h1>
+        
+        <div class="mensaje-box">
+            <div id="text-display">Inicializando...</div>
+        </div>
+
+        <div class="monitor-wrapper">
+            <div class="scan-bar"></div> <svg class="monitor-svg" viewBox="0 0 500 200" preserveAspectRatio="xMidYMid meet">
+                <path class="pulso-fantasma" d="M0,100 L80,100 L95,100 L105,140 L125,30 L145,170 L155,100 L190,100 L205,75 L220,100 L240,100 C270,100 280,70 300,70 C320,70 330,90 330,110 C330,140 300,160 280,180 C260,160 230,140 230,110 C230,90 240,70 260,70 C280,70 290,100 290,100" />
+                <path id="pulse-path" class="pulso-energia" d="M0,100 L80,100 L95,100 L105,140 L125,30 L145,170 L155,100 L190,100 L205,75 L220,100 L240,100 C270,100 280,70 300,70 C320,70 330,90 330,110 C330,140 300,160 280,180 C260,160 230,140 230,110 C230,90 240,70 260,70 C280,70 290,100 290,100" />
+            </svg>
+        </div>
+    </div>
+
+    <script>
+        const audio = document.getElementById('cancion');
+        const overlay = document.getElementById('overlay');
+        const content = document.getElementById('main-content');
+        const startBtn = document.getElementById('start-btn');
+        const pulsePath = document.getElementById('pulse-path');
+        const musicToggle = document.getElementById('music-toggle');
+        const textDisplay = document.getElementById('text-display');
+
+        const mensajes = [
+            "ESTADO: ENAMORADO AL 100%",
+            "ALERTA: LATIDOS IRREGULARES POR TI",
+            "ERES MI CÓDIGO FUENTE ❤️",
+            "CONEXIÓN PERMANENTE ESTABLECIDA",
+            "MI MUNDO ERES TÚ",
+            "TE AMO MÁS ALLÁ DE LA LÓGICA"
+        ];
+
+        let msgIndex = 0;
+
+        startBtn.addEventListener('click', () => {
+            overlay.style.opacity = '0';
+            overlay.style.transform = 'scale(1.2)'; // Efecto de zoom al salir
+            
+            setTimeout(() => {
+                overlay.style.display = 'none';
+                content.classList.add('active');
+                musicToggle.style.display = 'block';
+                audio.play().catch(e => console.warn("Audio bloqueado:", e));
+                
+                // Iniciar secuencia
+                pulsePath.classList.add('active-pulse');
+                iniciarEfectosVisuales();
+                // Primer impacto inmediato
+                setTimeout(() => document.body.classList.add('beat-impact'), 1400);
+                setTimeout(() => document.body.classList.remove('beat-impact'), 1700);
+            }, 800);
+        });
+
+        function iniciarEfectosVisuales() {
+            // Ciclo de mensajes
+            setInterval(() => {
+                textDisplay.classList.remove('digital-in');
+                void textDisplay.offsetWidth; // Reiniciar animación CSS
+                textDisplay.innerText = mensajes[msgIndex];
+                textDisplay.classList.add('digital-in');
+                msgIndex = (msgIndex + 1) % mensajes.length;
+            }, 4000);
+
+            // Generador de partículas explosivas
+            setInterval(() => {
+                const p = document.createElement('div');
+                p.className = 'super-particle';
+                const icons = ['❤️', '⚡', '✨', '🔥', '💖'];
+                p.innerHTML = icons[Math.floor(Math.random() * icons.length)];
+                p.style.left = Math.random() * 95 + 'vw';
+                p.style.fontSize = (Math.random() * 25 + 15) + 'px';
+                document.body.appendChild(p);
+                setTimeout(() => p.remove(), 2500);
+            }, 250); // Muy rápido
+
+            // Sincronización del impacto de pantalla con el latido fuerte
+            setInterval(() => {
+                setTimeout(() => {
+                    document.body.classList.add('beat-impact');
+                    // Vibración háptica si el navegador lo soporta (Android mayormente)
+                    if (navigator.vibrate) navigator.vibrate(100); 
+                }, 1500); // Ajustado al pico de la animación de 3s
+                
+                setTimeout(() => {
+                    document.body.classList.remove('beat-impact');
+                }, 1800);
+            }, 3000); // Duración del ciclo del pulso
+        }
+
+        musicToggle.addEventListener('click', () => {
+            if (audio.paused) { audio.play(); musicToggle.innerText = "🔊"; } 
+            else { audio.pause(); musicToggle.innerText = "🔇"; }
+        });
+    </script>
+</body>
+</html>
